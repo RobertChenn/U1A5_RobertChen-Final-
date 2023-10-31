@@ -18,16 +18,85 @@ public class AssignmentProgram extends javax.swing.JFrame {
     Random ran = new Random();
     ImageIcon playerPNG = new ImageIcon("player.png");
     ImageIcon bossPNG = new ImageIcon("boss.png");
-    String userName;
-    int playerHealth = 100, bossHealth = 100, playerMove, bossMove, bossAction, playerDamage, bossDamage, playerHeal, bossHeal;
+    String userName, phaseNumber;
+    int playerHealth = 100, bossHealth = 100, playerMove, bossMove, bossAction, bossDamage, bossHealthIncrease = 0, 
+            playerHealthIncrease = 0, levelIncrease = 0, phase, playerMoveMax = 0, currency = 0, totalCost, attackUpgradeCost = 0, 
+            healthUpgradeCost = 0, decreaseBossCost = 0, attackUpgradeAmount, healthUpgradeAmount, bossDecreaseAmount, bossDecreaseHealth = 0,
+            playerMoveCounter = 0, bossHealthCounter = 0, playerHealthCounter = 0;
+    boolean findWinner, lose = false;
+    double valueOfBarPlayer;
+    
+    // Gets the boss' action and the damage that both characters may deal/block
     public void getMove() {
-        bossAction = ran.nextInt(0, 3);
-        playerMove = ran.nextInt(0, 16);
-        bossMove = ran.nextInt(0, 16);
+        bossAction = ran.nextInt(0, 5);
+        playerMove = ran.nextInt(1, (16 + playerMoveMax));
+        bossMove = ran.nextInt(1, 16);
     }
     
+    // Checks if the user has won or lost
+    public void checkWin() {
+        if (playerHealth == 0) {
+            playerHealth = 0;
+            battleOutput.setText(userName + " has lost!");
+            findWinner = true;
+            lose = true;
+            playerHealthBar.setValue(0);
+        } else if (bossHealth == 0) {
+            battleOutput.setText(userName + " has beaten the phase! Click the button to move on to the next level.");
+            levelIncrease++;
+            findWinner = true;
+            bossHealthIncrease = 10;
+            bossHealthBar.setValue(0);
+            phaseIncrease();
+        }
+        if (phase == 4) {
+            battleOutput.setText(userName + " has beaten the boss!");
+            findWinner = true;
+        }
+    }
+    
+    // Changes the phase text to match the phase number
+    public void setPhase() {
+        phase = levelIncrease + 1;
+        phaseNumber = Integer.toString(phase);
+        level.setText("Phase " + phaseNumber);
+    }
+    
+    // Increases the phase when the user wins
+    public void phaseIncrease() {
+        if (lose == false) {
+            for (int i = 0; i < levelIncrease; i++) {
+                currency += 100;
+            }
+        }
+        bossHealth = 100 + bossHealthIncrease;
+        playerHealth = 100 + playerHealthIncrease;
+        bossHealthBar.setMaximum(bossHealth);
+        balance.setText(Integer.toString(currency));
+    }
+    
+    // Sets the boss' health bar
+    public void setBossBar() {
+        bossHealthBar.setMaximum(100 + (bossHealthIncrease * levelIncrease)
+                - bossHealthCounter);
+        bossHealthBar.setValue(bossHealth);
+        bossHealthBar.setString(Integer.toString(bossHealth) +  "/" + Integer.toString(100 + (bossHealthIncrease * levelIncrease)
+                - bossHealthCounter));
+    }
+    
+    // Sets the players health bar
+    public void setPlayerBar() {
+        playerHealthBar.setMaximum(100 + playerHealthCounter);
+        playerHealthBar.setValue(playerHealth);
+        playerHealthBar.setString(Integer.toString(playerHealth) +  "/" + Integer.toString(100 + playerHealthCounter));
+    }
+    
+    // Adds the images of the player and the boss
     public AssignmentProgram() {
         initComponents();
+        
+        playerImage.setIcon(playerPNG);
+        bossImage.setIcon(bossPNG);
     }
 
     /**
@@ -42,55 +111,67 @@ public class AssignmentProgram extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         playerHealthBar = new javax.swing.JProgressBar();
         gameName = new javax.swing.JLabel();
-        upgradeDmg = new javax.swing.JButton();
         separator = new javax.swing.JTextField();
         shopTitle = new javax.swing.JLabel();
         weaponCost = new javax.swing.JLabel();
-        upgradeHp = new javax.swing.JButton();
-        decreaseBoss = new javax.swing.JButton();
         healthCost = new javax.swing.JLabel();
         bossCost = new javax.swing.JLabel();
         attack = new javax.swing.JButton();
         dodge = new javax.swing.JButton();
-        heal = new javax.swing.JButton();
+        defend = new javax.swing.JButton();
         userNamePrompt = new javax.swing.JLabel();
         userNameInput = new javax.swing.JTextField();
         battleOutput = new javax.swing.JTextField();
         shopOutput = new javax.swing.JTextField();
-        jSpinner1 = new javax.swing.JSpinner();
-        jSpinner2 = new javax.swing.JSpinner();
-        jSpinner3 = new javax.swing.JSpinner();
+        upgradeAttackAmount = new javax.swing.JSpinner();
+        upgradeHealthAmount = new javax.swing.JSpinner();
+        decreaseBossAmount = new javax.swing.JSpinner();
         level = new javax.swing.JLabel();
         bossHealthBar = new javax.swing.JProgressBar();
+        upgradeDmg = new javax.swing.JTextField();
+        upgradeHp = new javax.swing.JTextField();
+        decreaseBoss = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        playerImage = new javax.swing.JLabel();
+        bossImage = new javax.swing.JLabel();
+        cash = new javax.swing.JLabel();
+        balance = new javax.swing.JTextField();
+        purchase = new javax.swing.JButton();
+        nextLevel = new javax.swing.JButton();
+        reset = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        rules = new javax.swing.JTextArea();
 
         jLabel2.setText("jLabel2");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        playerHealthBar.setBackground(new java.awt.Color(0, 255, 51));
+        playerHealthBar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        playerHealthBar.setForeground(new java.awt.Color(255, 255, 51));
+        playerHealthBar.setValue(100);
+        playerHealthBar.setString("100/100");
+        playerHealthBar.setStringPainted(true);
+
         gameName.setFont(new java.awt.Font("Tw Cen MT Condensed Extra Bold", 0, 36)); // NOI18N
-        gameName.setForeground(new java.awt.Color(0, 204, 255));
+        gameName.setForeground(new java.awt.Color(255, 153, 0));
         gameName.setText("Beat the Boss!");
 
-        upgradeDmg.setText("New Weapon (x1.5)");
-
-        separator.setBackground(new java.awt.Color(0, 204, 255));
+        separator.setEditable(false);
+        separator.setBackground(new java.awt.Color(255, 153, 0));
 
         shopTitle.setFont(new java.awt.Font("Tw Cen MT Condensed Extra Bold", 0, 36)); // NOI18N
-        shopTitle.setForeground(new java.awt.Color(0, 204, 255));
+        shopTitle.setForeground(new java.awt.Color(255, 153, 0));
         shopTitle.setText("Shop");
 
         weaponCost.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         weaponCost.setText("$50:");
 
-        upgradeHp.setText("Upgrade Health (+10)");
-
-        decreaseBoss.setText("Decrease Boss Health (-50)");
-
         healthCost.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         healthCost.setText("$75:");
 
         bossCost.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        bossCost.setText("$120:");
+        bossCost.setText("$100:");
 
         attack.setText("Attack");
         attack.addActionListener(new java.awt.event.ActionListener() {
@@ -106,10 +187,10 @@ public class AssignmentProgram extends javax.swing.JFrame {
             }
         });
 
-        heal.setText("Heal");
-        heal.addActionListener(new java.awt.event.ActionListener() {
+        defend.setText("Defend");
+        defend.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                healActionPerformed(evt);
+                defendActionPerformed(evt);
             }
         });
 
@@ -121,9 +202,71 @@ public class AssignmentProgram extends javax.swing.JFrame {
             }
         });
 
-        level.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        battleOutput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                battleOutputActionPerformed(evt);
+            }
+        });
+
+        upgradeAttackAmount.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
+
+        upgradeHealthAmount.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
+
+        decreaseBossAmount.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
+
+        level.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         level.setForeground(new java.awt.Color(255, 102, 102));
-        level.setText("Level One");
+        level.setText("Phase 1");
+
+        bossHealthBar.setBackground(new java.awt.Color(51, 255, 51));
+        bossHealthBar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        bossHealthBar.setForeground(new java.awt.Color(255, 255, 51));
+        bossHealthBar.setValue(100);
+        bossHealthBar.setString("100/100");
+        bossHealthBar.setStringPainted(true);
+
+        upgradeDmg.setText("New Weapon (+ 2)");
+
+        upgradeHp.setText("Upgrade Health (+5)");
+
+        decreaseBoss.setText("Decrease Boss Health (-5)");
+
+        playerImage.setFont(new java.awt.Font("Segoe UI", 0, 1)); // NOI18N
+        playerImage.setText(".");
+
+        bossImage.setFont(new java.awt.Font("Segoe UI", 0, 1)); // NOI18N
+        bossImage.setText(".");
+
+        cash.setText("Cash:");
+
+        balance.setText("0");
+
+        purchase.setText("Purchase");
+        purchase.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                purchaseActionPerformed(evt);
+            }
+        });
+
+        nextLevel.setText("Next Level");
+        nextLevel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nextLevelActionPerformed(evt);
+            }
+        });
+
+        reset.setText("Reset");
+        reset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetActionPerformed(evt);
+            }
+        });
+
+        rules.setEditable(false);
+        rules.setColumns(20);
+        rules.setRows(5);
+        rules.setText("Controls:\nReset - resets the entire game\nShop - Use the spinners to choose how many of each upgrade you want to buy\nTo win - beat all 4 phases of the boss fight");
+        jScrollPane1.setViewportView(rules);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -131,176 +274,402 @@ public class AssignmentProgram extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 73, Short.MAX_VALUE)
-                        .addComponent(gameName)
-                        .addGap(70, 70, 70))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(26, 26, 26)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(playerHealthBar, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(56, 56, 56)
-                                .addComponent(bossHealthBar, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(userNamePrompt)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(userNameInput, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addComponent(battleOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addComponent(level)
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(attack)
-                                            .addGap(26, 26, 26)
-                                            .addComponent(dodge)))
-                                    .addGap(18, 18, 18)
-                                    .addComponent(heal))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)))
-                .addComponent(separator, javax.swing.GroupLayout.PREFERRED_SIZE, 9, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(45, 45, 45)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(weaponCost)
-                                .addGap(18, 18, 18)
-                                .addComponent(upgradeDmg)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(healthCost)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(upgradeHp)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(bossCost)
-                                        .addGap(17, 17, 17)
-                                        .addComponent(decreaseBoss)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jSpinner3, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(shopOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(29, 29, 29))
+                                        .addGap(102, 102, 102)
+                                        .addComponent(jLabel1))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(3, 3, 3)
+                                        .addComponent(playerHealthBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(bossHealthBar, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(19, 19, 19))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(20, 20, 20)
+                                        .addComponent(attack)
+                                        .addGap(56, 56, 56))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addComponent(level)
+                                        .addGap(47, 47, 47)))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(26, 26, 26)
+                                        .addComponent(dodge))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addGap(13, 13, 13)
+                                        .addComponent(nextLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(reset)
+                                        .addGap(20, 20, 20))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addComponent(defend)
+                                        .addGap(12, 12, 12))))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(shopTitle)
-                                .addGap(130, 130, 130))))))
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(bossImage, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(48, 48, 48)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(gameName)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(userNamePrompt)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(userNameInput, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addComponent(playerImage))
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(24, 24, 24))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap(17, Short.MAX_VALUE)
+                        .addComponent(battleOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 412, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
+                .addComponent(separator, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(169, 169, 169)
+                        .addComponent(shopTitle)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
+                        .addComponent(cash)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(balance, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(33, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(weaponCost)
+                        .addGap(18, 18, 18)
+                        .addComponent(upgradeDmg, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(upgradeAttackAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(94, 94, 94))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(160, 160, 160)
+                                .addComponent(purchase))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(79, 79, 79)
+                                .addComponent(healthCost)
+                                .addGap(18, 18, 18)
+                                .addComponent(upgradeHp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(21, 21, 21)
+                                .addComponent(upgradeHealthAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(12, 12, 12)
+                                .addComponent(shopOutput, javax.swing.GroupLayout.PREFERRED_SIZE, 382, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(66, 66, 66)
+                                .addComponent(bossCost)
+                                .addGap(18, 18, 18)
+                                .addComponent(decreaseBoss, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(decreaseBossAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 828, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(separator)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(17, 17, 17)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(1, 1, 1)
-                        .addComponent(shopTitle)
-                        .addGap(51, 51, 51)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(upgradeDmg)
-                            .addComponent(weaponCost)
-                            .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(119, 119, 119)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(upgradeHp)
-                            .addComponent(healthCost)
-                            .addComponent(jSpinner2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 116, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(decreaseBoss)
-                            .addComponent(bossCost)
-                            .addComponent(jSpinner3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(27, 27, 27)
-                        .addComponent(shopOutput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(19, 19, 19))
-                    .addGroup(layout.createSequentialGroup()
+                        .addGap(13, 13, 13)
                         .addComponent(gameName)
-                        .addGap(8, 8, 8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(userNamePrompt)
                             .addComponent(userNameInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(23, 23, 23)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(attack)
-                            .addComponent(dodge)
-                            .addComponent(heal))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(attack)
+                                    .addComponent(dodge)
+                                    .addComponent(defend))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(20, 20, 20)
+                                        .addComponent(level))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(nextLevel))))
+                            .addComponent(reset))
                         .addGap(18, 18, 18)
-                        .addComponent(level)
-                        .addGap(20, 20, 20)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(playerHealthBar, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(bossHealthBar, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(playerImage)
+                                    .addComponent(bossImage, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(63, 63, 63)
+                                .addComponent(jLabel1)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                        .addComponent(battleOutput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(separator, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGap(16, 16, 16)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(shopTitle)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(cash)
+                                .addComponent(balance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(49, 49, 49)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(weaponCost)
+                            .addComponent(upgradeAttackAmount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(upgradeDmg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(battleOutput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(17, 17, 17))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(healthCost)
+                            .addComponent(upgradeHealthAmount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(upgradeHp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(94, 94, 94)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(bossCost)
+                            .addComponent(decreaseBossAmount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(decreaseBoss, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(purchase)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(shopOutput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    // Makes the user attack
     private void attackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_attackActionPerformed
         getMove();
+        userName = userNameInput.getText();
         
-        if (bossAction == 0) {
-            if (playerMove > bossMove) {
-                playerDamage = playerMove - bossMove;
-                bossHealth -= playerDamage;
-                battleOutput.setText(userName + " dealt " + playerDamage + " damage!");
-            } else if (bossMove > playerMove) {
-                bossDamage = bossMove - playerMove;
-                playerHealth -= bossDamage;
-                battleOutput.setText("The boss dealt " + bossDamage + " damage!");
+        if (findWinner == false) {
+            if (userName.isEmpty()) {
+                battleOutput.setText("Please enter a username.");
             } else {
-                battleOutput.setText("No damage was dealt!");
+                if (bossAction == 0 || bossAction == 1 || bossAction == 2) {
+                    if (playerMove > bossMove) {
+                        if (bossHealth >= playerMove) {
+                            bossHealth -= playerMove;
+                            setBossBar();
+                            battleOutput.setText(userName + " overpowered the boss and dealt " + playerMove + " damage!");
+                        } else {
+                            battleOutput.setText(userName + " has overpowered the boss and dealt " + bossHealth + " damage!");
+                            bossHealth = 0;
+                            bossHealthBar.setString("0/" + Integer.toString(100 + bossHealthCounter));
+                        }
+                    } else if (bossMove > playerMove) {
+                        if (playerHealth >= bossMove) {
+                            playerHealth -= bossMove;
+                            setPlayerBar();
+                            battleOutput.setText("The boss overpowered " + userName + " and dealt " + bossDamage + " damage");
+                        } else {
+                            battleOutput.setText("The boss overpowered has overpowered " + userName + " and dealt " + playerHealth + " damage!");
+                            playerHealth = 0;
+                            playerHealthBar.setString("0/" + Integer.toString(100 + playerHealthCounter));
+                        }
+                    } else {
+                        battleOutput.setText("No damage was dealt!");
+                    }
+                } else if (bossAction == 3) {
+                    battleOutput.setText("The boss dodged " + userName + "'s attack!");
+                } else if (bossAction == 4) {
+                    if (bossHealth >= playerMove) {
+                        if (bossMove > playerMove) {
+                            battleOutput.setText("The boss has blocked " + playerMove + " damage from " + userName + "!");
+                        } else if (playerMove > bossMove) {
+                            bossHealth -= playerMove - bossMove;
+                            setBossBar();
+                            battleOutput.setText("The boss has blocked " + (playerMove - (playerMove - bossMove)) + " damage but has still taken " + 
+                                    (playerMove - bossMove) + " damage");
+                        }
+                    }
+                }
+                checkWin();
             }
-        } else if (bossAction == 1) {
-            battleOutput.setText("The boss dodged " + userName + "'s attack!");
-        } else {
-            bossHeal += bossMove + playerMove;
-            bossHealth += bossMove;
-            battleOutput.setText(userName + " dealt " + playerMove + " damage, but the boss healed" + bossHeal + "HP!");
         }
     }//GEN-LAST:event_attackActionPerformed
-
+    
+    // Makes the user dodge
     private void dodgeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dodgeActionPerformed
         getMove();
+        checkWin();
+        userName = userNameInput.getText();
         
-        if (bossAction == 0) {
-            battleOutput.setText("The boss dealt " + bossMove + " damage, but " + userName + " dodged the attack!");
-        } else if (bossAction == 1) {
-            battleOutput.setText("Both parties have dodged!");
-        } else {
-            bossHealth += bossMove;
-            battleOutput.setText(userName + " has dodged and the boss has healed " + bossMove + " HP!");
+        if (findWinner == false) {
+            if (userName.isEmpty()) {
+                battleOutput.setText("Please enter a username.");
+            } else {
+                if (bossAction == 0 || bossAction == 1 || bossAction == 2) {
+                    battleOutput.setText("The boss dealt " + bossMove + " damage, but " + userName + " dodged the attack!");
+                } else if (bossAction == 3) {
+                    battleOutput.setText("Both parties have dodged!");
+                } else if (bossAction == 4) {
+                    battleOutput.setText(userName + " has dodged and the boss has defended!");
+                }
+            }
         }
     }//GEN-LAST:event_dodgeActionPerformed
-
+    
+    // Has no function
     private void userNameInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userNameInputActionPerformed
-        userName = userNameInput.getText();
+        // TODO add your handling code here:
     }//GEN-LAST:event_userNameInputActionPerformed
-
-    private void healActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_healActionPerformed
+    
+    // Makes the user defend
+    private void defendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_defendActionPerformed
         getMove();
+        checkWin();
+        userName = userNameInput.getText();
         
-        if (bossAction == 0) {
-            playerHeal += playerMove + bossMove;
-            playerHealth += playerMove;
-            battleOutput.setText("The boss dealt " + bossMove + " damage, but " + userName + " healed" + playerHeal + "HP!");
-        } else if (bossAction == 1) {
-            battleOutput.setText("Both parties have dodged!");
-        } else {
-            playerHealth += playerMove;
-            bossHealth += bossMove;
-            battleOutput.setText(userName + " has healed " + playerMove + " HP and the boss has healed " + bossMove + " HP!" );
+        if (findWinner == false) {
+            if (userName.isEmpty()) {
+                battleOutput.setText("Please enter a username.");
+            } else {
+                if (bossAction == 0 || bossAction == 1 || bossAction == 2) {
+                    if (playerMove > bossMove) {
+                        battleOutput.setText("The player has blocked " + bossMove + " damage from the boss!");
+                    } else if (bossMove > playerMove) {
+                        playerHealth -= bossMove - playerMove;
+                        setPlayerBar();
+                        battleOutput.setText("The player has blocked " + (bossMove - (bossMove - playerMove)) + " damage but has still taken " + (bossMove - playerMove) + " damage");
+                    }
+                } else if (bossAction == 3) {
+                    battleOutput.setText("The boss dodged and " + userName + " has defended!");
+                } else if (bossAction == 4) {
+                    battleOutput.setText("Both users have defended!");
+                }
+            }
         }
-    }//GEN-LAST:event_healActionPerformed
+    }//GEN-LAST:event_defendActionPerformed
+
+    // Has no function
+    private void battleOutputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_battleOutputActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_battleOutputActionPerformed
+    
+    // Purchases any item that the player may have bought in the shop
+    private void purchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_purchaseActionPerformed
+        healthUpgradeAmount = 0;
+        attackUpgradeAmount = (int)upgradeAttackAmount.getValue();
+        healthUpgradeAmount = (int)upgradeHealthAmount.getValue();
+        bossDecreaseAmount = (int)decreaseBossAmount.getValue();
+        decreaseBossCost = 0;
+        attackUpgradeCost = 0;
+        healthUpgradeCost = 0;
+        playerMoveMax = 0;
+        playerHealthIncrease = 0;
+        bossDecreaseHealth = 0;
+        totalCost = 0;
+        
+        for (int i = 0; i < attackUpgradeAmount; i++) {
+            attackUpgradeCost += 50;
+        }
+        for (int n = 0; n < healthUpgradeAmount; n++) {
+            healthUpgradeCost += 75;
+        }
+        for (int x = 0; x < bossDecreaseAmount; x++) {
+            decreaseBossCost += 100;
+        }
+        
+        totalCost = decreaseBossCost + attackUpgradeCost + healthUpgradeCost;
+        System.out.println(totalCost);
+        if (totalCost <= currency) {
+            for (int j = 0; j < attackUpgradeAmount; j++) {
+                playerMoveMax += 2;
+            }
+            for (int q = 0; q < healthUpgradeAmount; q++) {
+                playerHealthIncrease += 5;
+            }
+            for (int t = 0; t < bossDecreaseAmount; t++) {
+                bossDecreaseHealth += 5;
+            }
+            System.out.println(playerHealthIncrease);
+            if (attackUpgradeAmount >= 1) {
+                playerMoveCounter += playerMoveMax;
+                playerMove += playerMoveCounter;
+            }
+            if (healthUpgradeAmount >= 1) {
+                playerHealthCounter += playerHealthIncrease;
+                playerHealth += playerHealthIncrease;
+                playerHealthBar.setMaximum(100 + playerHealthCounter);
+                playerHealthBar.setValue((playerHealth));
+                System.out.println(valueOfBarPlayer);
+                playerHealthBar.setString(Integer.toString(playerHealth) +  "/" + Integer.toString(100 + playerHealthCounter));
+            }
+            if (bossDecreaseAmount >= 1) {
+                bossHealthCounter += bossDecreaseHealth;
+                bossHealth -= bossHealthCounter;
+                bossHealthBar.setMaximum((100 + bossHealthIncrease) - bossHealthCounter);
+                bossHealthBar.setValue(bossHealth);
+                System.out.println(bossHealth);
+                bossHealthBar.setString(Integer.toString(bossHealth) + "/" + Integer.toString(100 + (bossHealthIncrease * levelIncrease) - bossHealthCounter));
+            }
+            currency -= totalCost;
+            balance.setText(Integer.toString(currency));
+            shopOutput.setText("You upgraded your damage " + attackUpgradeAmount + " times, health " + healthUpgradeAmount + 
+                    " times and decreased the boss' health " + bossDecreaseAmount + " times");
+        } else {
+            shopOutput.setText("You do not have enough money to buy these items");
+        }
+    }//GEN-LAST:event_purchaseActionPerformed
+    
+    // Allows user to move to the next level
+    private void nextLevelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextLevelActionPerformed
+        checkWin();
+        
+        if (findWinner == true) {
+            findWinner = false;
+            setPhase();
+            bossHealth = 100 + (bossHealthIncrease * levelIncrease);
+            bossHealthBar.setString(Integer.toString(bossHealth - bossHealthCounter) + "/" + Integer.toString(100 + (bossHealthIncrease * levelIncrease) - 
+                    bossHealthCounter));
+            playerHealthBar.setString(Integer.toString(playerHealth) + "/" + Integer.toString(100 + playerHealthCounter));
+            playerHealthBar.setValue(playerHealth + playerHealthCounter);
+            bossHealthBar.setValue(100 + bossHealthIncrease);
+        } else {
+            battleOutput.setText("You have not beat this phase yet");
+        }
+    }//GEN-LAST:event_nextLevelActionPerformed
+    
+    // Resets the game
+    private void resetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetActionPerformed
+        findWinner = false;
+        lose = false;
+        playerHealth = 100;
+        bossHealth = 100;
+        playerMoveMax = 0;
+        currency -= currency;
+        levelIncrease = 0;
+        playerHealthIncrease = 0;
+        playerHealthCounter = 0;
+        bossHealthIncrease = 0;
+        bossHealthCounter = 0;
+        setPhase();
+        balance.setText(Integer.toString(currency));
+        bossHealthBar.setMaximum(100);
+        playerHealthBar.setMaximum(100);
+        setPlayerBar();
+        setBossBar();
+        shopOutput.setText("");
+        battleOutput.setText("");
+    }//GEN-LAST:event_resetActionPerformed
 
     /**
      * @param args the command line arguments
@@ -329,7 +698,6 @@ public class AssignmentProgram extends javax.swing.JFrame {
         }
         //</editor-fold>
         //</editor-fold>
-
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -340,25 +708,35 @@ public class AssignmentProgram extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton attack;
+    private javax.swing.JTextField balance;
     private javax.swing.JTextField battleOutput;
     private javax.swing.JLabel bossCost;
     private javax.swing.JProgressBar bossHealthBar;
-    private javax.swing.JButton decreaseBoss;
+    private javax.swing.JLabel bossImage;
+    private javax.swing.JLabel cash;
+    private javax.swing.JTextField decreaseBoss;
+    private javax.swing.JSpinner decreaseBossAmount;
+    private javax.swing.JButton defend;
     private javax.swing.JButton dodge;
     private javax.swing.JLabel gameName;
-    private javax.swing.JButton heal;
     private javax.swing.JLabel healthCost;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JSpinner jSpinner1;
-    private javax.swing.JSpinner jSpinner2;
-    private javax.swing.JSpinner jSpinner3;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel level;
+    private javax.swing.JButton nextLevel;
     private javax.swing.JProgressBar playerHealthBar;
+    private javax.swing.JLabel playerImage;
+    private javax.swing.JButton purchase;
+    private javax.swing.JButton reset;
+    private javax.swing.JTextArea rules;
     private javax.swing.JTextField separator;
     private javax.swing.JTextField shopOutput;
     private javax.swing.JLabel shopTitle;
-    private javax.swing.JButton upgradeDmg;
-    private javax.swing.JButton upgradeHp;
+    private javax.swing.JSpinner upgradeAttackAmount;
+    private javax.swing.JTextField upgradeDmg;
+    private javax.swing.JSpinner upgradeHealthAmount;
+    private javax.swing.JTextField upgradeHp;
     private javax.swing.JTextField userNameInput;
     private javax.swing.JLabel userNamePrompt;
     private javax.swing.JLabel weaponCost;
